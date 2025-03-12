@@ -63,6 +63,7 @@ public class OpenTelemetryHelper {
 
         if config.collectorTLS {
              return ClientConnection.usingPlatformAppropriateTLS(for: group)
+                 .withTLS(certificateVerification: .none)
                  .connect(host: config.collectorHost, port: config.collectorPort)
          } else {
               return ClientConnection.insecure(group: group)
