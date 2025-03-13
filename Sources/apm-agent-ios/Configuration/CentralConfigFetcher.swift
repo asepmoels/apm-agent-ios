@@ -15,6 +15,18 @@
 import Foundation
 import Logging
 
+class AllowInvalidSslSessionDelegate: NSObject, URLSessionDelegate {
+    func urlSession(_ session: URLSession, didReceive challenge: URLAuthenticationChallenge,
+                    completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
+        if let serverTrust = challenge.protectionSpace.serverTrust {
+            let credential = URLCredential(trust: serverTrust)
+            completionHandler(.useCredential, credential)
+        } else {
+            completionHandler(.cancelAuthenticationChallenge, nil)
+        }
+    }
+}
+
 class CentralConfigFetcher {
     
     static let ETAG_KEY = "elastic.central.config.etag"
@@ -125,7 +137,8 @@ class CentralConfigFetcher {
                 request.setValue(auth, forHTTPHeaderField: "Authorization")
             }
             
-            task = URLSession.shared.dataTask(with: request  ,completionHandler: { data, response, error in
+            let session = URLSession(configuration: .default, delegate: AllowInvalidSslSessionDelegate(), delegateQueue: nil)
+            task = session.dataTask(with: request) { data, response, error in
                 if let error = error {
                     self.logger.error("\(error.localizedDescription)")
                     return
@@ -162,7 +175,7 @@ class CentralConfigFetcher {
                     }
                 }
                 
-            })
+            }
             task?.resume()
         }
         
