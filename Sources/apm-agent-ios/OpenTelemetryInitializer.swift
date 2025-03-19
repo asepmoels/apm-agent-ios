@@ -192,10 +192,11 @@ class OpenTelemetryInitializer {
       timeout: OtlpConfiguration.DefaultTimeoutInterval,
       headers: OpenTelemetryHelper.generateExporterHeaders(configuration.agent.auth))
 
+    let session = URLSession(configuration: .default, delegate: AllowInvalidSslSessionDelegate(), delegateQueue: nil)
     let resources = AgentResource.get().merging(other: AgentEnvResource.get())
     let metricExporter = {
       let metricEndpoint = URL(string: endpoint.absoluteString + "/v1/metrics")
-      let defaultExporter = OtlpHttpMetricExporter(endpoint: metricEndpoint ?? endpoint, config: otlpConfiguration, useSession: URLSession.shared)
+      let defaultExporter = OtlpHttpMetricExporter(endpoint: metricEndpoint ?? endpoint, config: otlpConfiguration, useSession: session)
       do {
         if let path = Self.createPersistenceFolder() {
           return try PersistenceMetricExporterDecorator(
@@ -208,7 +209,7 @@ class OpenTelemetryInitializer {
 
     let traceExporter = {
       let traceEndpoint = URL(string: endpoint.absoluteString + "/v1/traces")
-      let defaultExporter = OtlpHttpTraceExporter(endpoint: traceEndpoint ?? endpoint, config:otlpConfiguration, useSession: URLSession.shared)
+      let defaultExporter = OtlpHttpTraceExporter(endpoint: traceEndpoint ?? endpoint, config:otlpConfiguration, useSession: session)
       do {
         if let path = Self.createPersistenceFolder() {
           return try PersistenceSpanExporterDecorator(
@@ -222,7 +223,7 @@ class OpenTelemetryInitializer {
 
     let logExporter = {
       let logsEndpoint = URL(string: endpoint.absoluteString + "/v1/logs")
-      let defaultExporter = OtlpHttpLogExporter(endpoint: logsEndpoint ?? endpoint, config: otlpConfiguration,useSession: URLSession.shared)
+      let defaultExporter = OtlpHttpLogExporter(endpoint: logsEndpoint ?? endpoint, config: otlpConfiguration,useSession: session)
       do {
         if let path = Self.createPersistenceFolder() {
           return try PersistenceLogExporterDecorator(
