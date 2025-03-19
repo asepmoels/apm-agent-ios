@@ -132,7 +132,8 @@ class CentralConfigFetcher {
 
     if let request = buildCentralConfigRequest() {
 
-      task = URLSession.shared.dataTask(with: request, completionHandler: { data, response, error in
+      let session = URLSession(configuration: .default, delegate: AllowInvalidSslSessionDelegate(), delegateQueue: nil)
+      task = session.dataTask(with: request, completionHandler: { data, response, error in
         if let error = error {
           self.logger.error("\(error.localizedDescription)")
           return
