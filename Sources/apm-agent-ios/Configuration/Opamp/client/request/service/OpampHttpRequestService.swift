@@ -39,7 +39,7 @@ public class OpampHttpRequestService: RequestService {
   init(
     httpClient: OpampSender = OpampHttpSender(url: defaultURL),
     requestDelay: TimeInterval = 30.0,
-    retryDelay: TimeInterval = 30.0,
+    retryDelay: TimeInterval = 30.0
   ) {
     self.httpClient = httpClient
     self.requestDelay = requestDelay
@@ -61,7 +61,7 @@ public class OpampHttpRequestService: RequestService {
       )
   }
 
-  public func start(callback: RequestServiceCallback, request: Supplier<OpampRequest>) {
+  public func start(callback: RequestServiceCallback, request: any Supplier<OpampRequest>) {
     lock.lock()
     defer { lock.unlock() }
     if (isStopped) {
@@ -125,7 +125,7 @@ public class OpampHttpRequestService: RequestService {
       let error = NSError(
         domain: HTTPURLResponse
           .localizedString(forStatusCode: httpResponse.statusCode),
-        code: httpResponse.statusCode,
+        code: httpResponse.statusCode
       )
 
       DispatchQueue.global().async { [weak self, error] in
