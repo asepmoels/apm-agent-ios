@@ -22,6 +22,13 @@ public struct InstrumentationConfiguration {
   public var enableAppMetricInstrumentation = true
   public var enableSystemMetrics = true
   public var enableLifecycleEvents = true
+    public var nameSpanBlock: ((URLRequest) -> (String)?)? = { request in
+        if let host = request.url?.host, let method = request.httpMethod {
+          return "\(method) \(host)"
+        }
+        return nil
+    }
+    public var blacklistedDomains: [String] = []
   public var storageConfiguration: PersistencePerformancePreset = .default
   public init() {}
 }

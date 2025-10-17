@@ -85,13 +85,14 @@ class InstrumentationWrapper {
       #endif
 
       let config = URLSessionInstrumentationConfiguration(shouldRecordPayload: nil,
-                                                          shouldInstrument: nil,
-                                                          nameSpan: { request in
-          if let host = request.url?.host, let method = request.httpMethod {
-            return "\(method) \(host)"
+                                                          shouldInstrument: { request in
+          if let host = request.url?.host,
+             self.config.instrumentation.blacklistedDomains.contains(host) {
+              return false
           }
-          return nil
+          return true
       },
+                                                          nameSpan: self.config.instrumentation.nameSpanBlock,
                                                           shouldInjectTracingHeaders: nil,
                                                           createdRequest: { _, span in
       #if os(iOS) && !targetEnvironment(macCatalyst)
